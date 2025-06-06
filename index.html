@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spotify Auth Redirect</title>
+</head>
+<body>
+  <h2>Spotify Authentication Complete</h2>
+  <p>Copy the full URL from your address bar and paste it back into the terminal.</p>
+  <textarea id="url" rows="4" cols="80" readonly></textarea>
+  <script>
+    const fullUrl = window.location.href;
+    document.getElementById('url').value = fullUrl;
+  </script>
+</body>
+</html>
