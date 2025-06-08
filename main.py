@@ -93,7 +93,7 @@ def main():
             current_action = hand_gesture
 
         # Execute command if new action detected
-        if (current_action and current_action != last_gesture and 
+        if (current_action and
             current_time - last_action_time > action_cooldown):
             print(f"🎵 Executing command: {current_action}")
             spotify.execute_command(current_action)
