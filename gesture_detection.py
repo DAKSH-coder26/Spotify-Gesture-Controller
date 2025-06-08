@@ -21,7 +21,7 @@ class HandGestureRecognizer:
             for hand_landmarks in results.multi_hand_landmarks:
                 lm_list = [(lm.x, lm.y) for lm in hand_landmarks.landmark]
                 gesture = self.classify_static_gesture(lm_list)
-                self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+                #self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
 
         return frame, gesture
 
@@ -38,24 +38,35 @@ class HandGestureRecognizer:
 
         thumb_up = lm[4][1] < lm[3][1]
         thumb_down = lm[4][1] > lm[3][1]
-        y_diff = lm[4][1] - lm[2][1]
 
         thumb_tip = lm[4]
         index_tip = lm[8]
-        thumb_ip = lm[3]
-        index_pip = lm[6]
+        thumb_mid = lm[3]
+        index_mid = lm[6]
+
+        base_distance = self.distance(thumb_mid, index_mid)
+
         tip_distance = self.distance(thumb_tip, index_tip)
-        base_distance = self.distance(thumb_ip, index_pip)
-        proximity_ratio = tip_distance / base_distance if base_distance != 0 else 1
-        thumb_curvature = self.distance(thumb_tip, thumb_ip)
-        index_curvature = self.distance(index_tip, index_pip)
-        vertical_relation = (thumb_tip[1] > thumb_ip[1]) and (index_tip[1] < index_pip[1])
+
+        vector_thumb = (thumb_tip[0] - thumb_mid[0], thumb_tip[1] - thumb_mid[1])
+        vector_index = (index_tip[0] - index_mid[0], index_tip[1] - index_mid[1])
+        dot_product = vector_thumb[0]*vector_index[0] + vector_thumb[1]*vector_index[1]
+        magnitude_thumb = math.hypot(*vector_thumb)
+        magnitude_index = math.hypot(*vector_index)
+        cos_angle = dot_product / (magnitude_thumb * magnitude_index + 1e-6)
+
+        angle = math.acos(min(1.0, max(-1.0, cos_angle))) * (180 / math.pi)
+
         other_fingers_folded = not finger_up["middle"] and not finger_up["ring"] and not finger_up["pinky"]
 
-        if (vertical_relation and proximity_ratio < 0.6 and
-            thumb_curvature > base_distance * 0.3 and index_curvature > base_distance * 0.3 and
-            other_fingers_folded):
+        if (
+            base_distance < 0.08 and
+            tip_distance > 0.1 and
+            angle > 60 and  
+            other_fingers_folded
+        ):
             return "Like Song"
+
 
         if all(finger_up.values()):
             return "Pause"
@@ -100,13 +111,13 @@ class FaceGestureRecognizer:
                 nose_tip_x = face_landmarks.landmark[1].x
                 self.face_positions.append(nose_tip_x)
 
-                self.mp_draw.draw_landmarks(
+                '''self.mp_draw.draw_landmarks(
                     image=frame,
                     landmark_list=face_landmarks,
                     connections=mp.solutions.face_mesh.FACEMESH_TESSELATION,
                     landmark_drawing_spec=self.mp_draw.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
                     connection_drawing_spec=self.mp_draw.DrawingSpec(color=(0, 255, 0), thickness=1)
-                )
+                )'''
 
                 if len(self.face_positions) == self.face_positions.maxlen:
                     x_avg_start = sum(list(self.face_positions)[:5]) / 5
