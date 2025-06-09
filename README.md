@@ -110,9 +110,9 @@ Press `Q` to quit.
 
 ---
 
-## 📷 Screenshots / Demo (Coming Soon)
+## Demo
 
-> You can add a demo GIF or screenshot here!
+> Drive - https://drive.google.com/file/d/1kgHTHTP6vNs1ozFQsRkTcaaNmMovaI-a/view?usp=drivesdk
 
 ---
 
